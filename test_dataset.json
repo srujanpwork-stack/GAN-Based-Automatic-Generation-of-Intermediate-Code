@@ -1,0 +1,220 @@
+{
+  "title": "Test fixtures for GAN-Based Automatic Generation of Intermediate Code",
+  "schema_version": "1.0",
+  "language_subset": "Restricted C-like integer language: int declarations, assignments, + - * /, parentheses, and return.",
+  "notes": [
+    "expected_tac is for the deterministic rule-based TAC generator, not the neural model's predicted output.",
+    "Division uses the notebook's integer-truncation behavior for the supplied positive integer examples.",
+    "Invalid-case expected_failure describes the intended category; exact exception text may differ.",
+    "The notebook does not automatically load this file yet."
+  ],
+  "valid_cases": [
+    {
+      "id": "V01",
+      "description": "Declaration and return",
+      "source": "int a = 7; return a;",
+      "expected_tac": [
+        "a = 7",
+        "return a"
+      ],
+      "expected_return": 7
+    },
+    {
+      "id": "V02",
+      "description": "Addition",
+      "source": "int a = 2; int b = 3; int out = a + b; return out;",
+      "expected_tac": [
+        "a = 2",
+        "b = 3",
+        "t1 = a + b",
+        "out = t1",
+        "return out"
+      ],
+      "expected_return": 5
+    },
+    {
+      "id": "V03",
+      "description": "Subtraction",
+      "source": "int a = 9; int b = 4; int out = a - b; return out;",
+      "expected_tac": [
+        "a = 9",
+        "b = 4",
+        "t1 = a - b",
+        "out = t1",
+        "return out"
+      ],
+      "expected_return": 5
+    },
+    {
+      "id": "V04",
+      "description": "Multiplication",
+      "source": "int a = 6; int b = 7; int out = a * b; return out;",
+      "expected_tac": [
+        "a = 6",
+        "b = 7",
+        "t1 = a * b",
+        "out = t1",
+        "return out"
+      ],
+      "expected_return": 42
+    },
+    {
+      "id": "V05",
+      "description": "Integer division",
+      "source": "int a = 20; int b = 4; int out = a / b; return out;",
+      "expected_tac": [
+        "a = 20",
+        "b = 4",
+        "t1 = a / b",
+        "out = t1",
+        "return out"
+      ],
+      "expected_return": 5
+    },
+    {
+      "id": "V06",
+      "description": "Operator precedence",
+      "source": "int a = 2; int b = 3; int c = 4; int out = a + b * c; return out;",
+      "expected_tac": [
+        "a = 2",
+        "b = 3",
+        "c = 4",
+        "t1 = b * c",
+        "t2 = a + t1",
+        "out = t2",
+        "return out"
+      ],
+      "expected_return": 14
+    },
+    {
+      "id": "V07",
+      "description": "Parentheses change precedence",
+      "source": "int a = 2; int b = 3; int c = 4; int out = (a + b) * c; return out;",
+      "expected_tac": [
+        "a = 2",
+        "b = 3",
+        "c = 4",
+        "t1 = a + b",
+        "t2 = t1 * c",
+        "out = t2",
+        "return out"
+      ],
+      "expected_return": 20
+    },
+    {
+      "id": "V08",
+      "description": "Nested arithmetic",
+      "source": "int a = 8; int b = 2; int c = 3; int out = (a - b) * c + 1; return out;",
+      "expected_tac": [
+        "a = 8",
+        "b = 2",
+        "c = 3",
+        "t1 = a - b",
+        "t2 = t1 * c",
+        "t3 = t2 + 1",
+        "out = t3",
+        "return out"
+      ],
+      "expected_return": 19
+    },
+    {
+      "id": "V09",
+      "description": "Assignment to declared variable",
+      "source": "int a = 5; a = a + 4; return a;",
+      "expected_tac": [
+        "a = 5",
+        "t1 = a + 4",
+        "a = t1",
+        "return a"
+      ],
+      "expected_return": 9
+    },
+    {
+      "id": "V10",
+      "description": "Multiple operations",
+      "source": "int a = 10; int b = 3; int out = a * b - 2; return out;",
+      "expected_tac": [
+        "a = 10",
+        "b = 3",
+        "t1 = a * b",
+        "t2 = t1 - 2",
+        "out = t2",
+        "return out"
+      ],
+      "expected_return": 28
+    },
+    {
+      "id": "V11",
+      "description": "Division after multiplication",
+      "source": "int a = 18; int b = 3; int c = 2; int out = a / b * c; return out;",
+      "expected_tac": [
+        "a = 18",
+        "b = 3",
+        "c = 2",
+        "t1 = a / b",
+        "t2 = t1 * c",
+        "out = t2",
+        "return out"
+      ],
+      "expected_return": 12
+    },
+    {
+      "id": "V12",
+      "description": "Expression with constants",
+      "source": "int a = 3; int out = (a + 5) * (2 + 1); return out;",
+      "expected_tac": [
+        "a = 3",
+        "t1 = a + 5",
+        "t2 = 2 + 1",
+        "t3 = t1 * t2",
+        "out = t3",
+        "return out"
+      ],
+      "expected_return": 24
+    }
+  ],
+  "invalid_cases": [
+    {
+      "id": "I01",
+      "description": "Use of undeclared variable",
+      "source": "int out = missing + 1; return out;",
+      "expected_failure": "semantic_error",
+      "reason": "Identifier 'missing' is used before declaration."
+    },
+    {
+      "id": "I02",
+      "description": "Assignment to undeclared target",
+      "source": "a = 5; return a;",
+      "expected_failure": "semantic_error",
+      "reason": "Assignment target 'a' has not been declared."
+    },
+    {
+      "id": "I03",
+      "description": "Duplicate declaration",
+      "source": "int a = 1; int a = 2; return a;",
+      "expected_failure": "semantic_error",
+      "reason": "Variable 'a' is declared twice."
+    },
+    {
+      "id": "I04",
+      "description": "Missing semicolon",
+      "source": "int a = 4 return a;",
+      "expected_failure": "syntax_error",
+      "reason": "The declaration is not terminated by a semicolon."
+    },
+    {
+      "id": "I05",
+      "description": "Unsupported comparison operator",
+      "source": "int a = 2; int b = 3; int out = a > b; return out;",
+      "expected_failure": "syntax_error",
+      "reason": "Comparison operators are outside the supported grammar."
+    },
+    {
+      "id": "I06",
+      "description": "Missing return statement",
+      "source": "int a = 1; a = a + 2;",
+      "expected_failure": "program_or_tac_validation_error",
+      "reason": "The source parses, but generated TAC validation reports a missing return."
+    }
+  ]
+}
